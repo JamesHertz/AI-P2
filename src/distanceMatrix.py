@@ -1,4 +1,7 @@
-from random import randrange
+from random import randrange, random
+from math import exp 
+
+FILE_NAME = '../'
 
 # reads a distance matrix (composed of a list of cities and the matrix itself)
 # given file name fName
@@ -103,6 +106,21 @@ def getInitials(cityList):
         initials += city[0]
     return initials
 
+# -----------------------------------------------------------------
+#                   My solution starts from here
+# -----------------------------------------------------------------
+
+def pathCost(m, path):
+    totcost = 0
+    prev = path[0]
+    for curr in path:
+        totcost += distance(m, prev, curr)
+        prev = curr
+
+    return totcost
+
+
+# problem formunation
 
 def initialState(cities):
     aux = cities[:]
@@ -113,8 +131,43 @@ def initialState(cities):
         del aux[idx]
     return initial
 
-def searchSolution(cities):
 
-    pass
+
+def randomNeighbour(path):
+    '''basically it chooses two cities and switches them'''
+
+    neighbour = path[::]
+
+    idx1 = path[randrange(len(path))]
+    idx2 = path[randrange(len(path))]
+
+    while abs(idx1 - idx2) <= 1:
+        idx2 = path[randrange(len(path))]
+    
+    neighbour[idx1] = path[idx2]
+    neighbour[idx2] = path[idx1]
+
+    return neighbour
+
+
+def searchSolution(cities):
+    m = readDistanceMatrix(FILE_NAME)
+    current = initialState(cities)
+    best = current
+    temperature = 999 # calculate the value later
+    while True:
+        next = randomNeighbour(current)
+        diff = pathCost(m, current) - pathCost(m, next)
+        if diff > 0:
+            current = next
+        else:
+            prob = exp(diff/temperature)/exp(1)
+            if (1 - prob) < random():
+                current = next
+        
+        best = next if pathCost(m, best) - pathCost(m, next) > 0 else best
+        # decreate the temperature
+
+    return best
 
 searchSolution([0, 1, 3]) # a solution :)
