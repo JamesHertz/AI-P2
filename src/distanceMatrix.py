@@ -1,7 +1,11 @@
+#! /usr/bin/env python
+from os import access
 from random import randrange, random
 from math import exp 
 
-FILE_NAME = '../'
+FILE_NAME = '../Distancias.txt'
+
+# parameters
 
 # reads a distance matrix (composed of a list of cities and the matrix itself)
 # given file name fName
@@ -22,7 +26,7 @@ def readDistanceMatrix(fName):
                 cities.append(city)
                 j = 1
                 while j<= i:
-                    row.append(l[0][j])
+                    row.append(float(l[0][j]))
                     j += 1
                 distances.append(row)
             i += 1
@@ -110,10 +114,11 @@ def getInitials(cityList):
 #                   My solution starts from here
 # -----------------------------------------------------------------
 
+# [1, 2, 3] => 1-2, 2-3, 3-1
 def pathCost(m, path):
-    totcost = 0
+    totcost = distance(m,path[0], path[-1])
     prev = path[0]
-    for curr in path:
+    for curr in path[1:]:
         totcost += distance(m, prev, curr)
         prev = curr
 
@@ -136,13 +141,17 @@ def initialState(cities):
 def randomNeighbour(path):
     '''basically it chooses two cities and switches them'''
 
-    neighbour = path[::]
+    def randomIdx():
+        return randrange(len(path))
 
-    idx1 = path[randrange(len(path))]
-    idx2 = path[randrange(len(path))]
+
+    neighbour = path[:]
+
+    idx1 = randomIdx()#randrange(len(path))
+    idx2 = randomIdx()
 
     while abs(idx1 - idx2) <= 1:
-        idx2 = path[randrange(len(path))]
+        idx2 = randomIdx() 
     
     neighbour[idx1] = path[idx2]
     neighbour[idx2] = path[idx1]
@@ -150,24 +159,84 @@ def randomNeighbour(path):
     return neighbour
 
 
+def get_inital_temp(m, cities):
+    [_, distances] = createReducedMatrix(m, cities)
+    d_max =  distances[0][0]
+    d_min = distances[0][0]
+    for r in distances:
+        for d in r:
+            d_min = min(d, d_min)
+            d_max = max(d, d_max)
+
+    return 2*d_max  - 2*d_min
+
+
 def searchSolution(cities):
+
     m = readDistanceMatrix(FILE_NAME)
+    #constants to take from user
+    max_tot_iter = 1e3
+    max_n_iter = len(cities) 
+    init_temp = get_inital_temp(m, cities)# calculate the value later
+    alpha = random() * (0.99 - 0.8) + 0.8
+    max_accepted = max_n_iter * 0.7
+    accept_factor = 0.3
+
+    pars = {'max_n_iter':max_n_iter,
+            'init_temp': init_temp,
+            'alpha': alpha,
+            'max_accepted': max_accepted,
+            'accept_factor': accept_factor,
+    }
+
+    for p in pars:
+        print(p, '=', pars[p])
+
+    # other variables
     current = initialState(cities)
+    temperature = init_temp
     best = current
-    temperature = 999 # calculate the value later
-    while True:
-        next = randomNeighbour(current)
-        diff = pathCost(m, current) - pathCost(m, next)
-        if diff > 0:
-            current = next
-        else:
-            prob = exp(diff/temperature)/exp(1)
-            if (1 - prob) < random():
+    accepted = 0
+    tot_iter = 0 
+
+    while temperature:
+        n_iter = 0
+        for i in range(max_n_iter):
+            n_iter += 1
+            next = randomNeighbour(current)
+            diff = pathCost(m, current) - pathCost(m, next)
+            if diff > 0:
                 current = next
-        
-        best = next if pathCost(m, best) - pathCost(m, next) > 0 else best
-        # decreate the temperature
+                accepted += 1
+
+                if accepted > max_accepted:
+                    break
+
+            else:
+                prob = exp(diff/temperature)
+                current = next if prob >= random() else current
+                n_iter += 1
+
+            best = next if pathCost(m, best) - pathCost(m, next) > 0 else best
+
+        temperature *= alpha # decreate the temperature
+        tot_iter += n_iter
+
+        if accepted / n_iter < accept_factor or tot_iter >= max_tot_iter:
+            return best
+
 
     return best
 
-searchSolution([0, 1, 3]) # a solution :)
+
+m = readDistanceMatrix(FILE_NAME)
+
+path = 'Atroeira, Douro, Pinhal, Teixoso, Ulgueira, Vilar'
+sol = searchSolution(path.split(', '))
+
+print(sol, ' cost: ', pathCost(m, sol))
+
+
+# 1436.0
+
+
