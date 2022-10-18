@@ -111,7 +111,7 @@ def getInitials(cityList):
     return initials
 
 # -----------------------------------------------------------------
-#                   My solution starts from here
+#                   Our solution starts from here
 # -----------------------------------------------------------------
 
 # [1, 2, 3] => 1-2, 2-3, 3-1
