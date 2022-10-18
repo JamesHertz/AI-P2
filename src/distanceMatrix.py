@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-from os import access
 from random import randrange, random
 from math import exp 
 
@@ -125,8 +124,7 @@ def pathCost(m, path):
     return totcost
 
 
-# problem formunation
-
+# problem formulation
 def initialState(cities):
     aux = cities[:]
     initial = []
@@ -178,9 +176,9 @@ def searchSolution(cities):
     max_tot_iter = 1e3
     max_n_iter = len(cities) 
     init_temp = get_inital_temp(m, cities)# calculate the value later
-    alpha = random() * (0.99 - 0.8) + 0.8
+    alpha = 0.84 #(0.99 - 0.8) + 0.8
     max_accepted = max_n_iter * 0.7
-    accept_factor = 0.3
+    accept_factor = 0.1
 
     pars = {'max_n_iter':max_n_iter,
             'init_temp': init_temp,
@@ -188,9 +186,6 @@ def searchSolution(cities):
             'max_accepted': max_accepted,
             'accept_factor': accept_factor,
     }
-
-    for p in pars:
-        print(p, '=', pars[p])
 
     # other variables
     current = initialState(cities)
@@ -224,7 +219,6 @@ def searchSolution(cities):
 
         if accepted / n_iter < accept_factor or tot_iter >= max_tot_iter:
             return best
-
 
     return best
 
