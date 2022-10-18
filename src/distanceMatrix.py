@@ -129,9 +129,10 @@ def initialState(cities):
     aux = cities[:]
     initial = []
     while len(aux) != 0:
-        idx = randrange(0, len(aux))
+        idx = randrange(len(aux))
         initial.append(aux[idx])
         del aux[idx]
+
     return initial
 
 
@@ -142,19 +143,16 @@ def randomNeighbour(path):
     def randomIdx():
         return randrange(len(path))
 
-
-    neighbour = path[:]
-
-    idx1 = randomIdx()#randrange(len(path))
+    idx1 = randomIdx()
     idx2 = randomIdx()
 
-    while abs(idx1 - idx2) <= 1:
+    while abs(idx1 - idx2) <= 1: # while the idxs are adjacent
         idx2 = randomIdx() 
-    
-    neighbour[idx1] = path[idx2]
-    neighbour[idx2] = path[idx1]
 
-    return neighbour
+    i = min(idx1, idx2)
+    j = max(idx1, idx2)
+
+    return path[:i + 1] + path[j: i: -1] + path[j+1:]
 
 
 def get_inital_temp(m, cities):
@@ -225,11 +223,14 @@ def searchSolution(cities):
 
 m = readDistanceMatrix(FILE_NAME)
 
-path = 'Atroeira, Douro, Pinhal, Teixoso, Ulgueira, Vilar'
+path = 'Atroeira, Douro, Pinhal, Teixoso, Ulgueira, Vilar'.split(', ')
+print(path)
+print(randomNeighbour(path))
+'''
 sol = searchSolution(path.split(', '))
 
 print(sol, ' cost: ', pathCost(m, sol))
-
+'''
 
 # 1436.0
 
