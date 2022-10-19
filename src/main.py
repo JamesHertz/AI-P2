@@ -88,7 +88,7 @@ def chooseDecaimentoTemp(config):
         while not n.isnumeric():
             n = input("alpha: 0.")
         alpha = "0." + n
-        return GeometricLowerTemp(config, float(alpha)), "Geomtrica, alpha: "+alpha
+        return GeometricLowerTemp(config, float(alpha)), "Geometrica, alpha: "+alpha
     elif ans == "2":
         n = ""
         while not n.isnumeric():
@@ -102,7 +102,7 @@ def chooseDecaimentoTemp(config):
         return GradualLowerTemp(config, float(beta)), "Gradual, beta: "+beta
     else:
         print(" >> Defalut escolhido: Geometrica (alpha = 0.84) <<")
-        return GeometricLowerTemp(config, 0.84), "Geomtrica, alpha: 0.84"
+        return GeometricLowerTemp(config, 0.84), "Geometrica, alpha: 0.84"
 
 
 def chooseNIterPerTemp(config):
