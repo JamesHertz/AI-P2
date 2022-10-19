@@ -245,13 +245,21 @@ class CompositeConfig:
 # lower_temp
 class ArithmeticLowerTemp(CompositeConfig):
 
+    def __init__(self, base_cfg, n):
+        super().__init__(base_cfg)
+        self.n = n
+
+    def lower_temp(self, temp):
+        return temp - self.n
+
+class GradualLowerTemp(CompositeConfig):
+
     def __init__(self, base_cfg, beta):
         super().__init__(base_cfg)
         self.beta = beta
 
     def lower_temp(self, temp):
-        return 0  # do the arithmetic thing TODO
-
+        return temp / (1 + self.beta * temp)
 
 class GeometricLowerTemp(CompositeConfig):
     def __init__(self, base_cfg, alpha):
@@ -308,7 +316,7 @@ class AcceptFactorTerminalTest(CompositeConfig):
         self.accept_factor = accept_factor
 
     def terminal_test(self, info):
-        return info[1]/info[2] < self.accept_factor
+        return info[2]/info[1] < self.accept_factor
 
 
 # an object with all that is needed to run the search
@@ -332,7 +340,9 @@ def searchSolution(problem: Problem, cfg: Configs):
                 accepted += 1
             else:
                 prob = exp(diff / temperature)
-                current = next if prob >= random() else current
+                if prob >= random():
+                    current = next
+                    accepted += 1
 
             #old = best
             best = next if problem.cost_func(best) > problem.cost_func(next) else best
@@ -349,7 +359,7 @@ def searchSolution(problem: Problem, cfg: Configs):
         #print('temp:', temperature)
         #print(tot_iter)
 
-        if cfg.terminal_test([tot_iter, n_iter, accepted]):
+        if cfg.terminal_test([tot_iter, n_iter, accepted, temperature]):
             return best
 
     return best
@@ -427,6 +437,54 @@ def chooseTerminalTest(config):
         return MaxIterTerminalTest(config, 2000)
 
 
+def chooseDecaimentoTemp(config):
+    print("\tDecaimento da Temperatura")
+    print("1: Geometrica")
+    print("2: Aritmetica")
+    print("3: Gradual")
+    print("Default: Geometrica (alpha = 0.84)")
+    ans = input(">> ")
+    if ans == "1":
+        n = ""
+        while not n.isnumeric():
+            n = input("alpha: 0.")
+        alpha = "0."+n
+        return GeometricLowerTemp(config, float(alpha))
+    elif ans == "2":
+        n = ""
+        while not n.isnumeric():
+            n = input("Decremento por iteracao: ")
+        return ArithmeticLowerTemp(config, int(n))
+    elif ans == "3":
+        n = ""
+        while not n.isnumeric():
+            n = input("beta: 0.")
+        beta = "0."+n
+        return GradualLowerTemp(config, float(beta))
+    else:
+        print(" >> Defalut escolhido: Geometrica (alpha = 0.84) <<")
+        return GeometricLowerTemp(config, 0.84)
+
+
+def chooseNIterPerTemp(config):
+    print("\tVariacao de nIter por cada Temp")
+    print("1: Constante (sempre igual ao valor inicial)")
+    print("2: Linear")
+    print("Default: Constante")
+    ans = input(">> ")
+    if ans == "1":
+        return ConstantNIterVar(config)
+    elif ans == "2":
+        n = ""
+        while not n.isnumeric():
+            n = input("fator: 0.")
+        fator = "0."+n
+        return LinearNIterVar(config, float(fator))
+    else:
+        print(" >> Defalut escolhido: Constante <<")
+        return GeometricLowerTemp(config, 0.84)
+
+
 if __name__ == '__main__':
     dm = readDistanceMatrix(FILE_NAME)
 
@@ -444,9 +502,11 @@ if __name__ == '__main__':
     # config = MaxIterTerminalTest(config, 2000)  # Terminal test
     config = chooseTerminalTest(config)  # Terminal test
 
-    config = GeometricLowerTemp(config, 0.84)  # Decaimento da temp
+    # config = GeometricLowerTemp(config, 0.84)  # Decaimento da temp
+    config = chooseDecaimentoTemp(config)  # Decaimento da temp
 
-    config = ConstantNIterVar(config)  # Variacao do numero de iteracoes por temperatura
+    # config = ConstantNIterVar(config)  # Variacao do numero de iteracoes por temperatura
+    config = chooseNIterPerTemp(config)
 
     sol = searchSolution(problem, config)
 
