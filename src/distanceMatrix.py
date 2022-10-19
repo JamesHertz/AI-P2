@@ -501,6 +501,7 @@ def addCities(dm):
         print("Cidades escolhidas: ", desiredCities)
         i = input(">> ")
         if i == "!":
+            print("> Todas as cidades adicionadas! <")
             return allCities
         if i == ".":
             if len(desiredCities) < 2:
