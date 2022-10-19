@@ -493,16 +493,16 @@ def chooseNIterPerTemp(config):
 
 
 def addCities(dm):
-    print("Selecione as cidades para adicionar ao caminho (o indice desejado)")
+    print("Selecione as cidades para adicionar ao caminho (a primeira lettra da cidade)")
     allCities = dm[0]
     desiredCities = []
-    for idx in range(len(allCities)):
-        print(idx, ": " + allCities[idx])
+    for city in allCities:
+        print('-', city)
     print("Se quiser adicionar todas insira um ponto de exclamacao (!)")
     print("Quando estiver pronto insere um ponto (.)")
     while True:
         print("Cidades escolhidas: ", desiredCities)
-        i = input(">> ")
+        i = input(">> ").strip().upper()
         if i == "!":
             print("> Todas as cidades adicionadas! <")
             return allCities
@@ -511,17 +511,21 @@ def addCities(dm):
                 print("Erro 001: Muito poucas cidades escolhidas")
                 continue
             break
-        if not i.isnumeric():
-            print("Erro 002: Escolhe um indice (Um numero)")
+
+        if  len(i) != 1:
+            print("Erro 002: Escolhe uma letra")
             continue
-        i = int(i)
-        if not (i >= 0 and i < len(allCities)):
-            print(f'Erro 003: Escolhe um numero entre 0 e {len(allCities) - 1}')
+
+        city = getCity(allCities, i)
+
+        if city == None:
+            print(f'Erro 003: Nenhuma cidade comeca com', i)
             continue
-        if allCities[i] in desiredCities:
+
+        if city in desiredCities:
             print("Erro 004: Cidade ja adicionada!")
             continue
-        desiredCities.append(allCities[i])
+        desiredCities.append(city)
     return desiredCities
 
 
