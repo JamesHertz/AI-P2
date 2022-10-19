@@ -1,6 +1,5 @@
 #! /usr/bin/env python
-from abc import abstractmethod
-from lib2to3.pytree import Base
+from abc import ABCMeta, abstractmethod
 from random import randrange, random
 from math import exp
 
@@ -98,7 +97,7 @@ def getAllCities(m):
 
 
 # from a distance matrix m and a String filter returns a subset of cites of m
-# with initials in filter 
+# with initials in filter
 def getCities(m, filter):
     cityList = []
     for initial in filter:
@@ -125,7 +124,7 @@ def getInitials(cityList):
 # -----------------------------------------------------------------
 #                   Our solution starts from here
 # -----------------------------------------------------------------
-
+# (metaclass=ABCMeta)
 class Problem:
 
     @abstractmethod
@@ -201,7 +200,7 @@ class TravSalemanProblem(Problem):
         return 2 * d_max - 2 * d_min
 
 
-# I used decorator a pattern that we have studied at the class
+# we used decorator a pattern that we have studied at SE's leactures
 class Configs:
     def __init__(self, n_iter, init_temp):
         self.n_iter = n_iter
@@ -309,7 +308,7 @@ class AcceptFactorTerminalTest(CompositeConfig):
         self.accept_factor = accept_factor
 
     def terminal_test(self, info):
-        return info[2] / info[1] < self.accept_factor
+        return info[1]/info[2] < self.accept_factor
 
 
 # an object with all that is needed to run the search
@@ -322,36 +321,35 @@ def searchSolution(problem: Problem, cfg: Configs):
     tot_iter = 0
 
     while temperature:
-        num_last_iter = 0
         accepted = 0
+
         for i in range(n_iter):
-            num_last_iter += 1
             next = problem.neighbour(current)
             diff = problem.cost_func(current) - problem.cost_func(next)
+
             if diff > 0:
                 current = next
                 accepted += 1
-
-                # what about this ???
-                # I think just have to drop this thing down :)
-                '''
-                if accepted > max_accepted:
-                    break
-                '''
             else:
                 prob = exp(diff / temperature)
                 current = next if prob >= random() else current
-                n_iter += 1
 
-            best = next if problem.cost_func(best) - problem.cost_func(next) > 0 else best
+            #old = best
+            best = next if problem.cost_func(best) > problem.cost_func(next) else best
+            #if old != best:
+            #    print('switched :)')
 
-        tot_iter += num_last_iter
+        tot_iter += n_iter
 
         # updates some stuffs :)
         temperature = cfg.lower_temp(temperature)
         n_iter = cfg.var_n_iter(n_iter)
 
-        if cfg.terminal_test([tot_iter, accepted, num_last_iter, temperature]):
+        #print('accepted:', accepted/n_iter)
+        #print('temp:', temperature)
+        #print(tot_iter)
+
+        if cfg.terminal_test([tot_iter, n_iter, accepted]):
             return best
 
     return best
