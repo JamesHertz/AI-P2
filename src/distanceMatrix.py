@@ -6,6 +6,7 @@ from math import exp
 
 FILE_NAME = '../Distancias.txt'
 
+
 # parameters
 
 # reads a distance matrix (composed of a list of cities and the matrix itself)
@@ -14,7 +15,7 @@ def readDistanceMatrix(fName):
     cities = []
     distances = []
     with open(fName, 'r') as f:
-        i=0
+        i = 0
         for line in f:
             if i == 0:
                 l = [line.rstrip().split()]
@@ -26,16 +27,17 @@ def readDistanceMatrix(fName):
                 city = l[0][0]
                 cities.append(city)
                 j = 1
-                while j<= i:
+                while j <= i:
                     row.append(float(l[0][j]))
                     j += 1
                 distances.append(row)
             i += 1
-    f.close()   
+    f.close()
     dm = []
     dm.append(cities)
     dm.append(distances)
     return dm
+
 
 # from a list of cities cityList return a String with their initials
 def getInitials(cityList):
@@ -44,65 +46,73 @@ def getInitials(cityList):
         initials += city[0]
     return initials
 
+
 # creates a distance matrix given another, m, and a list clist containing a subset
 # of the cities occurring in m
-def createReducedMatrix(m,clist):
+def createReducedMatrix(m, clist):
     cities = clist
     distances = []
-    for c in range(1,len(cities)):
+    for c in range(1, len(cities)):
         row = []
-        for v in range(0,c):
-            row.append(distance(m,cities[c],cities[v]))      
-        distances.append(row)  
+        for v in range(0, c):
+            row.append(distance(m, cities[c], cities[v]))
+        distances.append(row)
     dm = []
     dm.append(cities)
     dm.append(distances)
     return dm
 
-# creates a distance matrix given another, m, and a String, filter, containing 
+
+# creates a distance matrix given another, m, and a String, filter, containing
 # the initals of a subset of the cities occurring in m
-def createFilterMatrix(m,filter):
-    return createReducedMatrix(m,getCities(m,filter))
-    
+def createFilterMatrix(m, filter):
+    return createReducedMatrix(m, getCities(m, filter))
+
+
 # returns the distance between two cities c1 and c2, given distance matrix m
-def distance (m,c1,c2):
+def distance(m, c1, c2):
     index1 = m[0].index(c1)
     index2 = m[0].index(c2)
-    if index1<index2:
-        return int(m[1][index2-1][index1])
+    if index1 < index2:
+        return int(m[1][index2 - 1][index1])
     else:
-        return int(m[1][index1-1][index2])
-        
+        return int(m[1][index1 - 1][index2])
+
+
 # presents the given distance matrix m
 def showDistances(m):
     cities = '         '
-    for i in range(0,len(m[0])-1):
+    for i in range(0, len(m[0]) - 1):
         cities = cities + ' ' + "{:>9}".format(m[0][i])
     print(cities)
-    for i in range(0,len(m[1])):
-        row = "{:>9}".format(m[0][i+1])
-        for j in range(0,len(m[1][i])):
+    for i in range(0, len(m[1])):
+        row = "{:>9}".format(m[0][i + 1])
+        for j in range(0, len(m[1][i])):
             row = row + ' ' + "{:>9}".format(m[1][i][j])
         print(row)
+
 
 # from a distance matrix m returns a list of all the cites of m
 def getAllCities(m):
     return m[0]
 
+
 # from a distance matrix m and a String filter returns a subset of cites of m
 # with initials in filter 
-def getCities(m,filter):	
+def getCities(m, filter):
     cityList = []
     for initial in filter:
-        cityList.append(getCity(m[0],initial))
+        cityList.append(getCity(m[0], initial))
     return cityList
-    
+
+
 # from a list of cities cityList return the one with the first letter initial
-def getCity(cityList,initial):	
+def getCity(cityList, initial):
     for city in cityList:
         if city[0] == initial:
             return city
     return None
+
 
 # from a list of cities cityList return a String with their initials
 def getInitials(cityList):
@@ -110,6 +120,7 @@ def getInitials(cityList):
     for city in cityList:
         initials += city[0]
     return initials
+
 
 # -----------------------------------------------------------------
 #                   Our solution starts from here
@@ -135,22 +146,21 @@ class Problem:
         pass
 
 
-
 class TravSalemanProblem(Problem):
 
     def __init__(self, cities, dm):
-        self.dm  = createReducedMatrix(dm, cities)
-        self.cities = cities # think about this
+        self.dm = createReducedMatrix(dm, cities)
+        self.cities = cities  # think about this
 
     def cost_func(self, node):
-        totcost = distance(self.dm,node[0], node[-1])
+        totcost = distance(self.dm, node[0], node[-1])
 
         prev = node[0]
         for curr in node[1:]:
             totcost += distance(self.dm, prev, curr)
             prev = curr
 
-        return totcost 
+        return totcost
 
     def neighbour(self, node):
 
@@ -160,13 +170,13 @@ class TravSalemanProblem(Problem):
         idx1 = randomIdx()
         idx2 = randomIdx()
 
-        while abs(idx1 - idx2) <= 1: # while the idxs are adjacent
-            idx2 = randomIdx() 
+        while abs(idx1 - idx2) <= 1:  # while the idxs are adjacent
+            idx2 = randomIdx()
 
         i = min(idx1, idx2)
         j = max(idx1, idx2)
 
-        return node[:i + 1] + node[j: i: -1] + node[j+1:]
+        return node[:i + 1] + node[j: i: -1] + node[j + 1:]
 
     # think about this :)
     def init_sol(self):
@@ -188,11 +198,11 @@ class TravSalemanProblem(Problem):
                 d_min = min(d, d_min)
                 d_max = max(d, d_max)
 
-        return 2*d_max  - 2*d_min
+        return 2 * d_max - 2 * d_min
+
 
 # I used decorator a pattern that we have studied at the class
 class Configs:
-
     def __init__(self, n_iter, init_temp):
         self.n_iter = n_iter
         self.init_temp = init_temp
@@ -208,9 +218,10 @@ class Configs:
 
     def var_n_iter(self, n_iter):
         pass
-    
+
     def terminal_test(self, info):
         pass
+
 
 class CompositeConfig:
     def __init__(self, base_cfg: Configs):
@@ -227,7 +238,7 @@ class CompositeConfig:
 
     def var_n_iter(self, n_iter):
         return self.base.var_n_iter(n_iter)
-    
+
     def terminal_test(self, info):
         return self.base.terminal_test(info)
 
@@ -238,9 +249,9 @@ class ArithmeticLowerTemp(CompositeConfig):
     def __init__(self, base_cfg, beta):
         super().__init__(base_cfg)
         self.beta = beta
-    
+
     def lower_temp(self, temp):
-        return 0 # do the arithmetic thing
+        return 0  # do the arithmetic thing TODO
 
 
 class GeometricLowerTemp(CompositeConfig):
@@ -250,6 +261,7 @@ class GeometricLowerTemp(CompositeConfig):
 
     def lower_temp(self, temp):
         return self.alpha * temp
+
 
 # var_n_iter
 class ConstantNIterVar(CompositeConfig):
@@ -268,6 +280,7 @@ class LinearNIterVar(CompositeConfig):
     def var_n_iter(self, n_iter):
         return n_iter * self.factor
 
+
 # terminal test
 class MaxIterTerminalTest(CompositeConfig):
 
@@ -278,6 +291,17 @@ class MaxIterTerminalTest(CompositeConfig):
     def terminal_test(self, info):
         return info[0] >= self.max_iter
 
+
+class MinTempTerminalTest(CompositeConfig):
+
+    def __init__(self, base_cfg, min_temp):
+        super().__init__(base_cfg)
+        self.min_temp = min_temp
+
+    def terminal_test(self, info):
+        return info[3] <= self.min_temp
+
+
 class AcceptFactorTerminalTest(CompositeConfig):
 
     def __init__(self, base_cfg, accept_factor):
@@ -285,19 +309,17 @@ class AcceptFactorTerminalTest(CompositeConfig):
         self.accept_factor = accept_factor
 
     def terminal_test(self, info):
-        return info[2]/info[1] < self.accept_factor
+        return info[2] / info[1] < self.accept_factor
 
 
 # an object with all that is needed to run the search
-def searchSolution(problem : Problem , cfg: Configs):
-
+def searchSolution(problem: Problem, cfg: Configs):
     current = problem.init_sol()
-
     temperature = cfg.get_init_temp()
-    n_iter  = cfg.get_n_iter()
+    n_iter = cfg.get_n_iter()
 
     best = current
-    tot_iter = 0 
+    tot_iter = 0
 
     while temperature:
         num_last_iter = 0
@@ -309,7 +331,7 @@ def searchSolution(problem : Problem , cfg: Configs):
             if diff > 0:
                 current = next
                 accepted += 1
-                
+
                 # what about this ???
                 # I think just have to drop this thing down :)
                 '''
@@ -317,7 +339,7 @@ def searchSolution(problem : Problem , cfg: Configs):
                     break
                 '''
             else:
-                prob = exp(diff/temperature)
+                prob = exp(diff / temperature)
                 current = next if prob >= random() else current
                 n_iter += 1
 
@@ -326,37 +348,108 @@ def searchSolution(problem : Problem , cfg: Configs):
         tot_iter += num_last_iter
 
         # updates some stuffs :)
-        temperature = cfg.lower_temp(temperature) 
+        temperature = cfg.lower_temp(temperature)
         n_iter = cfg.var_n_iter(n_iter)
 
-        if cfg.terminal_test([tot_iter, accepted, num_last_iter]):
+        if cfg.terminal_test([tot_iter, accepted, num_last_iter, temperature]):
             return best
 
     return best
 
 
-if __name__ == '__main__':
+def chooseInitializers(cities, problem):
+    print()
 
+    nIterInicial = len(cities)
+
+    print("\tnIter por temperatura INICIAL")
+    print("1: Constante que eu escolho")
+    print("2: Numero de cidades")
+    print("Default: Numero de cidades")
+    ans = input(">> ")
+    if ans == "1":
+        const = ""
+        while not const.isnumeric():
+            const = input("Constante: ")
+        nIterInicial = int(const)
+    else:
+        if ans != "2":
+            print(" >> Defalut escolhido: Numero de cidades <<")
+    print("nIterInicial: ", nIterInicial)
+    print()
+
+    temperaturaInicial = 0
+    print("\tTemperatura INICIAL")
+    print("1: Constante que eu escolho")
+    print("2: Calculado automatico")
+    print("Default: Calculado automatico")
+    ans = input(">> ")
+    if ans == "1":
+        const = ""
+        while not const.isnumeric():
+            const = input("Constante: ")
+        temperaturaInicial = int(const)
+    elif ans == "2":
+        temperaturaInicial = problem.calc_init_temp()
+    else:
+        print(" >> Defalut escolhido: Calculado automatico <<")
+        temperaturaInicial = problem.calc_init_temp()
+    print("Temperatura inicial: ", temperaturaInicial)
+    print()
+    return Configs(nIterInicial, temperaturaInicial)
+
+
+def chooseTerminalTest(config):
+    print("\tCriterio de paragem")
+    print("1: Temperatura mínima")
+    print("2: Limite de iterações")
+    print("3: Percentagem de soluções aceites")
+    print("Default: Limite de iteracoes (2000 iteracoes)")
+    ans = input(">> ")
+    if ans == "1":
+        n = ""
+        while not n.isnumeric():
+            n = input("Temperatura limite: ")
+        return MinTempTerminalTest(config, int(n))
+    elif ans == "2":
+        n = ""
+        while not n.isnumeric():
+            n = input("Limite de Iteracoes: ")
+        return MaxIterTerminalTest(config, int(n))
+    elif ans == "3":
+        n = ""
+        while not n.isnumeric():
+            n = input("Aceites / Total < 0.")
+        ratio = "0." + n
+        print(ratio)
+        print(float(ratio))
+        return AcceptFactorTerminalTest(config, float(ratio))
+    else:
+        print(" >> Defalut escolhido: Limite de iteracoes (2000 iteracoes) <<")
+        return MaxIterTerminalTest(config, 2000)
+
+
+if __name__ == '__main__':
     dm = readDistanceMatrix(FILE_NAME)
 
-    #path = 'Belmar, Cerdeira, Douro, Encosta, Freita, Gonta, Horta, Infantado, Lourel, Monte, Nelas, Oura, Pinhal, Quebrada, Roseiral, Serra, Teixoso, Ulgueira'
-    #path = 'Atroeira, Douro, Pinhal, Teixoso, Ulgueira, Vilar'
-    #cities = path.split(', ')
+    # path = 'Belmar, Cerdeira, Douro, Encosta, Freita, Gonta, Horta, Infantado, Lourel, Monte, Nelas, Oura, Pinhal, Quebrada, Roseiral, Serra, Teixoso, Ulgueira'
+    # path = 'Atroeira, Douro, Pinhal, Teixoso, Ulgueira, Vilar'
+    # cities = path.split(', ')
 
-    cities = dm[0]
-
+    cities = dm[0]  # Todas as cidades
 
     problem = TravSalemanProblem(cities, dm)
 
-    config = Configs(len(cities), problem.calc_init_temp())
+    # config = Configs(len(cities), problem.calc_init_temp())  # Inicializar nInterPerTemp e Temp
+    config = chooseInitializers(cities, problem)  # Inicializar nInterPerTemp e Temp
 
-    config = MaxIterTerminalTest(config, 2e3)
+    # config = MaxIterTerminalTest(config, 2000)  # Terminal test
+    config = chooseTerminalTest(config)  # Terminal test
 
-    config = GeometricLowerTemp(config, 0.84)
+    config = GeometricLowerTemp(config, 0.84)  # Decaimento da temp
 
-    config = ConstantNIterVar(config)
+    config = ConstantNIterVar(config)  # Variacao do numero de iteracoes por temperatura
 
     sol = searchSolution(problem, config)
 
     print(sol, 'cost:', problem.cost_func(sol))
-
