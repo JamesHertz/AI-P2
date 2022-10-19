@@ -190,7 +190,7 @@ class TravSalemanProblem(Problem):
 
         return 2*d_max  - 2*d_min
 
-# I used decorator a patter that we have studied at the class
+# I used decorator a pattern that we have studied at the class
 class Configs:
 
     def __init__(self, n_iter, init_temp):
@@ -290,15 +290,6 @@ class AcceptFactorTerminalTest(CompositeConfig):
 
 # an object with all that is needed to run the search
 def searchSolution(problem : Problem , cfg: Configs):
-
-    # constants to take from user
-    # alpha =  0.89 
-    # init_temp = get_inital_temp(m, cities)# calculate the value later
-    # accept_factor = 0.001
-    # max_accepted = max_n_iter * 0.7
-    # other variables
-
-    #m = readDistanceMatrix(FILE_NAME)
 
     current = problem.init_sol()
 
