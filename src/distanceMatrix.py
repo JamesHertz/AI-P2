@@ -384,7 +384,7 @@ def chooseInitializers(cities, problem):
         if ans != "2":
             print(" >> Defalut escolhido: Numero de cidades <<")
     print("nIterInicial: ", nIterInicial)
-    print()
+    print("*="*20)
 
     temperaturaInicial = 0
     print("\tTemperatura INICIAL")
@@ -403,7 +403,6 @@ def chooseInitializers(cities, problem):
         print(" >> Defalut escolhido: Calculado automatico <<")
         temperaturaInicial = problem.calc_init_temp()
     print("Temperatura inicial: ", temperaturaInicial)
-    print()
     return Configs(nIterInicial, temperaturaInicial)
 
 
@@ -477,8 +476,8 @@ def chooseNIterPerTemp(config):
     elif ans == "2":
         n = ""
         while not n.isnumeric():
-            n = input("fator: 0.")
-        fator = "0."+n
+            n = input("fator: 1.")
+        fator = "1."+n
         return LinearNIterVar(config, float(fator))
     else:
         print(" >> Defalut escolhido: Constante <<")
@@ -498,16 +497,18 @@ if __name__ == '__main__':
 
     # config = Configs(len(cities), problem.calc_init_temp())  # Inicializar nInterPerTemp e Temp
     config = chooseInitializers(cities, problem)  # Inicializar nInterPerTemp e Temp
+    print("*="*20)
 
     # config = MaxIterTerminalTest(config, 2000)  # Terminal test
     config = chooseTerminalTest(config)  # Terminal test
+    print("*="*20)
 
     # config = GeometricLowerTemp(config, 0.84)  # Decaimento da temp
     config = chooseDecaimentoTemp(config)  # Decaimento da temp
-    print()
+    print("*="*20)
     # config = ConstantNIterVar(config)  # Variacao do numero de iteracoes por temperatura
     config = chooseNIterPerTemp(config)
-    print()
+    print("*="*20)
     sol = searchSolution(problem, config)
 
     print(sol, 'cost:', problem.cost_func(sol))
