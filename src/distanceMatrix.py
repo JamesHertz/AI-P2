@@ -252,6 +252,7 @@ class ArithmeticLowerTemp(CompositeConfig):
     def lower_temp(self, temp):
         return temp - self.n
 
+
 class GradualLowerTemp(CompositeConfig):
 
     def __init__(self, base_cfg, beta):
@@ -260,6 +261,7 @@ class GradualLowerTemp(CompositeConfig):
 
     def lower_temp(self, temp):
         return temp / (1 + self.beta * temp)
+
 
 class GeometricLowerTemp(CompositeConfig):
     def __init__(self, base_cfg, alpha):
@@ -316,7 +318,7 @@ class AcceptFactorTerminalTest(CompositeConfig):
         self.accept_factor = accept_factor
 
     def terminal_test(self, info):
-        return info[2]/info[1] < self.accept_factor
+        return info[2] / info[1] < self.accept_factor
 
 
 # an object with all that is needed to run the search
@@ -344,9 +346,9 @@ def searchSolution(problem: Problem, cfg: Configs):
                     current = next
                     accepted += 1
 
-            #old = best
+            # old = best
             best = next if problem.cost_func(best) > problem.cost_func(next) else best
-            #if old != best:
+            # if old != best:
             #    print('switched :)')
 
         tot_iter += n_iter
@@ -355,9 +357,9 @@ def searchSolution(problem: Problem, cfg: Configs):
         temperature = cfg.lower_temp(temperature)
         n_iter = cfg.var_n_iter(n_iter)
 
-        #print('accepted:', accepted/n_iter)
-        #print('temp:', temperature)
-        #print(tot_iter)
+        # print('accepted:', accepted/n_iter)
+        # print('temp:', temperature)
+        # print(tot_iter)
 
         if cfg.terminal_test([tot_iter, n_iter, accepted, temperature]):
             return best
@@ -384,7 +386,7 @@ def chooseInitializers(cities, problem):
         if ans != "2":
             print(" >> Defalut escolhido: Numero de cidades <<")
     print("nIterInicial: ", nIterInicial)
-    print("*="*20)
+    print("*=" * 20)
 
     print("\t> Temperatura INICIAL <")
     print("1: Constante que eu escolho")
@@ -453,7 +455,7 @@ def chooseDecaimentoTemp(config):
         n = ""
         while not n.isnumeric():
             n = input("alpha: 0.")
-        alpha = "0."+n
+        alpha = "0." + n
         return GeometricLowerTemp(config, float(alpha))
     elif ans == "2":
         n = ""
@@ -464,7 +466,7 @@ def chooseDecaimentoTemp(config):
         n = ""
         while not n.isnumeric():
             n = input("beta: 0.")
-        beta = "0."+n
+        beta = "0." + n
         return GradualLowerTemp(config, float(beta))
     else:
         print(" >> Defalut escolhido: Geometrica (alpha = 0.84) <<")
@@ -483,18 +485,19 @@ def chooseNIterPerTemp(config):
         n = ""
         while not n.isnumeric():
             n = input("fator: 1.")
-        fator = "1."+n
+        fator = "1." + n
         return LinearNIterVar(config, float(fator))
     else:
         print(" >> Defalut escolhido: Constante <<")
         return ConstantNIterVar(config)
+
 
 def addCities(dm):
     print("Selecione as cidades para adicionar ao caminho (o indice desejado)")
     allCities = dm[0]
     desiredCities = []
     for idx in range(len(allCities)):
-        print(idx , ": " + allCities[idx])
+        print(idx, ": " + allCities[idx])
     print("Se quiser adicionar todas insira um ponto de exclamacao (!)")
     print("Quando estiver pronto insere um ponto (.)")
     while True:
@@ -525,35 +528,29 @@ def addCities(dm):
 if __name__ == '__main__':
     dm = readDistanceMatrix(FILE_NAME)
 
-    # path = 'Belmar, Cerdeira, Douro, Encosta, Freita, Gonta, Horta, Infantado, Lourel, Monte, Nelas, Oura, Pinhal, Quebrada, Roseiral, Serra, Teixoso, Ulgueira'
-    # path = 'Atroeira, Douro, Pinhal, Teixoso, Ulgueira, Vilar'
-    # cities = path.split(', ')
-
-    #cities = dm[0]  # Todas as cidades
+    # cities = dm[0]  # Todas as cidades
     cities = addCities(dm)
 
     problem = TravSalemanProblem(cities, dm)
 
-    # config = Configs(len(cities), problem.calc_init_temp())  # Inicializar nInterPerTemp e Temp
     config = chooseInitializers(cities, problem)  # Inicializar nInterPerTemp e Temp
-    print("*="*20)
+    print("*=" * 20)
 
-    # config = MaxIterTerminalTest(config, 2000)  # Terminal test
     config = chooseTerminalTest(config)  # Terminal test
-    print("*="*20)
+    print("*=" * 20)
 
-    # config = GeometricLowerTemp(config, 0.84)  # Decaimento da temp
     config = chooseDecaimentoTemp(config)  # Decaimento da temp
-    print("*="*20)
-    # config = ConstantNIterVar(config)  # Variacao do numero de iteracoes por temperatura
-    config = chooseNIterPerTemp(config)
-    print("*="*20)
+    print("*=" * 20)
+
+    config = chooseNIterPerTemp(config)  # Variacao do numero de iteracoes por temperatura
+    print("*=" * 20)
 
     cost = 99999
-    for i in range(100):
+    for i in range(100):  # Vai repetindo ate chegar a melhor...
         sol = searchSolution(problem, config)
         newcost = problem.cost_func(sol)
         if newcost < cost:
             cost = newcost
+            print(f'Tentativa {i+1} | ', end="")
             print('cost:', problem.cost_func(sol), " : ", sol)
     print("Ended")
