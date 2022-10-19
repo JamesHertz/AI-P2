@@ -285,7 +285,7 @@ class AcceptFactorTerminalTest(CompositeConfig):
         self.accept_factor = accept_factor
 
     def terminal_test(self, info):
-        return info[2]/info[1] < self.accept_factor
+        return info[1]/info[2] < self.accept_factor
 
 
 # an object with all that is needed to run the search
@@ -300,36 +300,28 @@ def searchSolution(problem : Problem , cfg: Configs):
     tot_iter = 0 
 
     while temperature:
-        num_last_iter = 0
         accepted = 0
+
         for i in range(n_iter):
-            num_last_iter += 1
             next = problem.neighbour(current)
             diff = problem.cost_func(current) - problem.cost_func(next)
+
             if diff > 0:
                 current = next
                 accepted += 1
-                
-                # what about this ???
-                # I think just have to drop this thing down :)
-                '''
-                if accepted > max_accepted:
-                    break
-                '''
             else:
                 prob = exp(diff/temperature)
                 current = next if prob >= random() else current
-                n_iter += 1
 
-            best = next if problem.cost_func(best) - problem.cost_func(next) > 0 else best
+            best = next if problem.cost_func(best) > problem.cost_func(next) else best
 
-        tot_iter += num_last_iter
+        tot_iter += n_iter
 
         # updates some stuffs :)
         temperature = cfg.lower_temp(temperature) 
         n_iter = cfg.var_n_iter(n_iter)
 
-        if cfg.terminal_test([tot_iter, accepted, num_last_iter]):
+        if cfg.terminal_test([tot_iter, n_iter, accepted]):
             return best
 
     return best
