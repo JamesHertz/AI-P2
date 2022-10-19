@@ -371,8 +371,7 @@ def chooseInitializers(cities, problem):
     print()
 
     nIterInicial = len(cities)
-
-    print("\t> nIter por temperatura INICIAL <")
+    print('> Numero de Iteracoes por temperatura INICIAL <')
     print("1: Constante que eu escolho")
     print("2: Numero de cidades")
     print("Default: Numero de cidades")
@@ -404,7 +403,7 @@ def chooseInitializers(cities, problem):
         print(" >> Defalut escolhido: Calculado automatico <<")
         temperaturaInicial = problem.calc_init_temp()
     print("Temperatura inicial: ", temperaturaInicial)
-    return Configs(nIterInicial, temperaturaInicial)
+    return Configs(nIterInicial, temperaturaInicial), nIterInicial, temperaturaInicial
 
 
 def chooseTerminalTest(config):
@@ -425,23 +424,21 @@ def chooseTerminalTest(config):
             except ValueError:
                 pass
 
-        return MinTempTerminalTest(config, n)
+        return MinTempTerminalTest(config, n), "Temperatura Minima Limite: " + str(n)
     elif ans == "2":
         n = ""
         while not n.isnumeric():
             n = input("Limite de Iteracoes: ")
-        return MaxIterTerminalTest(config, int(n))
+        return MaxIterTerminalTest(config, int(n)), "Numero Maximo de Iteracoes: " + n
     elif ans == "3":
         n = ""
         while not n.isnumeric():
             n = input("Aceites / Total < 0.")
         ratio = "0." + n
-        print(ratio)
-        print(float(ratio))
-        return AcceptFactorTerminalTest(config, float(ratio))
+        return AcceptFactorTerminalTest(config, float(ratio)), "Fator de aceitacao: " + ratio
     else:
         print(" >> Defalut escolhido: Limite de iteracoes (2000 iteracoes) <<")
-        return MaxIterTerminalTest(config, 2000)
+        return MaxIterTerminalTest(config, 2000), "Numero Maximo de Iteracoes: 2000"
 
 
 def chooseDecaimentoTemp(config):
@@ -456,21 +453,21 @@ def chooseDecaimentoTemp(config):
         while not n.isnumeric():
             n = input("alpha: 0.")
         alpha = "0." + n
-        return GeometricLowerTemp(config, float(alpha))
+        return GeometricLowerTemp(config, float(alpha)), "Geomtrica, alpha: "+alpha
     elif ans == "2":
         n = ""
         while not n.isnumeric():
             n = input("Decremento por iteracao: ")
-        return ArithmeticLowerTemp(config, int(n))
+        return ArithmeticLowerTemp(config, int(n)), "Aritmetica, n: "+n
     elif ans == "3":
         n = ""
         while not n.isnumeric():
             n = input("beta: 0.")
         beta = "0." + n
-        return GradualLowerTemp(config, float(beta))
+        return GradualLowerTemp(config, float(beta)), "Gradual, beta: "+beta
     else:
         print(" >> Defalut escolhido: Geometrica (alpha = 0.84) <<")
-        return GeometricLowerTemp(config, 0.84)
+        return GeometricLowerTemp(config, 0.84), "Geomtrica, alpha: 0.84"
 
 
 def chooseNIterPerTemp(config):
@@ -480,16 +477,16 @@ def chooseNIterPerTemp(config):
     print("Default: Constante")
     ans = input(">> ")
     if ans == "1":
-        return ConstantNIterVar(config)
+        return ConstantNIterVar(config), "Constante igual ao inicial"
     elif ans == "2":
         n = ""
         while not n.isnumeric():
             n = input("fator: 1.")
         fator = "1." + n
-        return LinearNIterVar(config, float(fator))
+        return LinearNIterVar(config, float(fator)), "Linear, fator: "+fator
     else:
         print(" >> Defalut escolhido: Constante <<")
-        return ConstantNIterVar(config)
+        return ConstantNIterVar(config), "Constante igual ao inicial"
 
 
 def addCities(dm):
@@ -533,18 +530,28 @@ if __name__ == '__main__':
 
     problem = TravSalemanProblem(cities, dm)
 
-    config = chooseInitializers(cities, problem)  # Inicializar nInterPerTemp e Temp
+    config, nIterInicial, tempInicial = chooseInitializers(cities, problem)  # Inicializar nInterPerTemp e Temp
     print("*=" * 20)
 
-    config = chooseTerminalTest(config)  # Terminal test
+    config, terminalChoice = chooseTerminalTest(config)  # Terminal test
     print("*=" * 20)
 
-    config = chooseDecaimentoTemp(config)  # Decaimento da temp
+    config, decaimentoChoice = chooseDecaimentoTemp(config)  # Decaimento da temp
     print("*=" * 20)
 
-    config = chooseNIterPerTemp(config)  # Variacao do numero de iteracoes por temperatura
+    config, nIterVarChoice = chooseNIterPerTemp(config)  # Variacao do numero de iteracoes por temperatura
     print("*=" * 20)
 
+    negrito = '\033[1m'
+    normal = '\033[0m'
+
+    print('{:*^19}'.format(" Informacoes "))
+    print("•Temperatura inicial: ", negrito, tempInicial, normal)
+    print("•Numero de iteracoes inicial: ", negrito, nIterInicial, normal)
+    print("•Criterio de paragem: ", negrito, terminalChoice, normal)
+    print("•Metodo decaimento temperatura: ", negrito, decaimentoChoice, normal)
+    print("•Metodo de variacao do numero\n de iteracoes por temperatura: ", negrito, nIterVarChoice, normal)
+    print()
     cost = 99999
     for i in range(100):  # Vai repetindo ate chegar a melhor...
         sol = searchSolution(problem, config)
