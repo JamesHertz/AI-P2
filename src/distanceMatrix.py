@@ -285,7 +285,7 @@ class LinearNIterVar(CompositeConfig):
         self.factor = factor
 
     def var_n_iter(self, n_iter):
-        return n_iter * self.factor
+        return int(n_iter * self.factor)
 
 
 # terminal test
@@ -370,7 +370,7 @@ def chooseInitializers(cities, problem):
 
     nIterInicial = len(cities)
 
-    print("\tnIter por temperatura INICIAL")
+    print("\t> nIter por temperatura INICIAL <")
     print("1: Constante que eu escolho")
     print("2: Numero de cidades")
     print("Default: Numero de cidades")
@@ -386,8 +386,7 @@ def chooseInitializers(cities, problem):
     print("nIterInicial: ", nIterInicial)
     print("*="*20)
 
-    temperaturaInicial = 0
-    print("\tTemperatura INICIAL")
+    print("\t> Temperatura INICIAL <")
     print("1: Constante que eu escolho")
     print("2: Calculado automatico")
     print("Default: Calculado automatico")
@@ -407,17 +406,24 @@ def chooseInitializers(cities, problem):
 
 
 def chooseTerminalTest(config):
-    print("\tCriterio de paragem")
+    print("\t> Criterio de paragem <")
     print("1: Temperatura mínima")
     print("2: Limite de iterações")
     print("3: Percentagem de soluções aceites")
     print("Default: Limite de iteracoes (2000 iteracoes)")
     ans = input(">> ")
     if ans == "1":
-        n = ""
-        while not n.isnumeric():
-            n = input("Temperatura limite: ")
-        return MinTempTerminalTest(config, int(n))
+        n = -1.0
+        done = False
+        while not done:
+            try:
+                value = input("Temperatura Limite: ")
+                n = float(value)
+                done = True
+            except ValueError:
+                pass
+
+        return MinTempTerminalTest(config, n)
     elif ans == "2":
         n = ""
         while not n.isnumeric():
@@ -437,7 +443,7 @@ def chooseTerminalTest(config):
 
 
 def chooseDecaimentoTemp(config):
-    print("\tDecaimento da Temperatura")
+    print("\t> Decaimento da Temperatura <")
     print("1: Geometrica")
     print("2: Aritmetica")
     print("3: Gradual")
@@ -466,7 +472,7 @@ def chooseDecaimentoTemp(config):
 
 
 def chooseNIterPerTemp(config):
-    print("\tVariacao de nIter por cada Temp")
+    print("\t> Variacao de nIter por cada Temp <")
     print("1: Constante (sempre igual ao valor inicial)")
     print("2: Linear")
     print("Default: Constante")
@@ -483,6 +489,37 @@ def chooseNIterPerTemp(config):
         print(" >> Defalut escolhido: Constante <<")
         return ConstantNIterVar(config)
 
+def addCities(dm):
+    print("Selecione as cidades para adicionar ao caminho (o indice desejado)")
+    allCities = dm[0]
+    desiredCities = []
+    for idx in range(len(allCities)):
+        print(idx , ": " + allCities[idx])
+    print("Se quiser adicionar todas insira um ponto de exclamacao (!)")
+    print("Quando estiver pronto insere um ponto (.)")
+    while True:
+        print("Cidades escolhidas: ", desiredCities)
+        i = input(">> ")
+        if i == "!":
+            return allCities
+        if i == ".":
+            if len(desiredCities) < 2:
+                print("Erro 001: Muito poucas cidades escolhidas")
+                continue
+            break
+        if not i.isnumeric():
+            print("Erro 002: Escolhe um indice (Um numero)")
+            continue
+        i = int(i)
+        if not (i >= 0 and i < len(allCities)):
+            print(f'Erro 003: Escolhe um numero entre 0 e {len(allCities) - 1}')
+            continue
+        if allCities[i] in desiredCities:
+            print("Erro 004: Cidade ja adicionada!")
+            continue
+        desiredCities.append(allCities[i])
+    return desiredCities
+
 
 if __name__ == '__main__':
     dm = readDistanceMatrix(FILE_NAME)
@@ -491,7 +528,8 @@ if __name__ == '__main__':
     # path = 'Atroeira, Douro, Pinhal, Teixoso, Ulgueira, Vilar'
     # cities = path.split(', ')
 
-    cities = dm[0]  # Todas as cidades
+    #cities = dm[0]  # Todas as cidades
+    cities = addCities(dm)
 
     problem = TravSalemanProblem(cities, dm)
 
@@ -509,6 +547,12 @@ if __name__ == '__main__':
     # config = ConstantNIterVar(config)  # Variacao do numero de iteracoes por temperatura
     config = chooseNIterPerTemp(config)
     print("*="*20)
-    sol = searchSolution(problem, config)
 
-    print(sol, 'cost:', problem.cost_func(sol))
+    cost = 99999
+    for i in range(100):
+        sol = searchSolution(problem, config)
+        newcost = problem.cost_func(sol)
+        if newcost < cost:
+            cost = newcost
+            print('cost:', problem.cost_func(sol), " : ", sol)
+    print("Ended")
