@@ -1,6 +1,5 @@
 #! /usr/bin/env python
-from abc import abstractmethod
-from lib2to3.pytree import Base
+from abc import ABCMeta, abstractmethod
 from random import randrange, random
 from math import exp
 
@@ -114,7 +113,7 @@ def getInitials(cityList):
 # -----------------------------------------------------------------
 #                   Our solution starts from here
 # -----------------------------------------------------------------
-
+# (metaclass=ABCMeta)
 class Problem:
 
     @abstractmethod
@@ -190,7 +189,7 @@ class TravSalemanProblem(Problem):
 
         return 2*d_max  - 2*d_min
 
-# I used decorator a pattern that we have studied at the class
+# we used decorator a pattern that we have studied at SE's leactures 
 class Configs:
 
     def __init__(self, n_iter, init_temp):
@@ -313,7 +312,10 @@ def searchSolution(problem : Problem , cfg: Configs):
                 prob = exp(diff/temperature)
                 current = next if prob >= random() else current
 
+            #old = best
             best = next if problem.cost_func(best) > problem.cost_func(next) else best
+            #if old != best:
+            #    print('switched :)')
 
         tot_iter += n_iter
 
@@ -321,11 +323,14 @@ def searchSolution(problem : Problem , cfg: Configs):
         temperature = cfg.lower_temp(temperature) 
         n_iter = cfg.var_n_iter(n_iter)
 
+        #print('accepted:', accepted/n_iter)
+        #print('temp:', temperature)
+        #print(tot_iter)
+
         if cfg.terminal_test([tot_iter, n_iter, accepted]):
             return best
 
     return best
-
 
 if __name__ == '__main__':
 
