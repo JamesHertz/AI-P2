@@ -482,7 +482,7 @@ def chooseNIterPerTemp(config):
         return LinearNIterVar(config, float(fator))
     else:
         print(" >> Defalut escolhido: Constante <<")
-        return GeometricLowerTemp(config, 0.84)
+        return ConstantNIterVar(config)
 
 
 if __name__ == '__main__':
@@ -504,10 +504,10 @@ if __name__ == '__main__':
 
     # config = GeometricLowerTemp(config, 0.84)  # Decaimento da temp
     config = chooseDecaimentoTemp(config)  # Decaimento da temp
-
+    print()
     # config = ConstantNIterVar(config)  # Variacao do numero de iteracoes por temperatura
     config = chooseNIterPerTemp(config)
-
+    print()
     sol = searchSolution(problem, config)
 
     print(sol, 'cost:', problem.cost_func(sol))
