@@ -372,9 +372,41 @@ def searchSolution(problem: Problem, cfg: Configs):
 
     return best
 
-'''
+def printLowerTemp(cfg : Configs):
+    while not isinstance(cfg, LowerTemp):
+        cfg = cfg.base
+    
+    if isinstance(cfg, ArithmeticLowerTemp):
+        pass
+
+    elif isinstance(cfg, GeometricLowerTemp):
+        pass
+
+    elif isinstance(cfg, GradualLowerTemp):
+        pass
+
+def printTerminalTest(cfg : Configs):
+    while not isinstance(cfg, TerminalTest):
+        cfg = cfg.base
+    
+    if isinstance(cfg, MinTempTerminalTest):
+        pass
+    if isinstance(cfg, MaxIterTerminalTest):
+        pass
+
+    if isinstance(cfg, AcceptFactorTerminalTest):
+        pass
+
+def printVarNIter(cfg : Configs):
+    while not isinstance(cfg, NIterVar):
+        cfg = cfg.base
+    if isinstance(cfg, ConstantNIterVar):
+        pass
+
+    elif isinstance(cfg, LinearNIterVar):
+        pass
+
 def printConfigs(cfg : Configs):
     printLowerTemp(cfg)
     printTerminalTest(cfg)
     printVarNIter(cfg)
-'''
