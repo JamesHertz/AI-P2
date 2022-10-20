@@ -193,5 +193,11 @@ if __name__ == '__main__':
     print()
     
     # think about this ....
-    sol = searchSolution(problem, config)
-    print('cost:', problem.cost_func(sol), " : ", sol)
+    for i in range(100):  # Vai repetindo ate chegar a melhor...
+            sol = searchSolution(problem, config)
+            newcost = problem.cost_func(sol)
+            if newcost < cost:
+                cost = newcost
+                print(f'Tentativa {i+1} | ', end="")
+                print('cost:', problem.cost_func(sol), " : ", sol)
+    print("Ended")
