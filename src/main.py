@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 
 from distanceMatrix import *
+from sys import argv, exit
+from json import JSONDecodeError, loads
 
 def chooseInitializers(cities, problem):
     print()
@@ -160,9 +162,117 @@ def addCities(dm):
         desiredCities.append(city)
     return desiredCities
 
+GEOMETRIC_LT  = 1
+ARITHMETIC_LT = 2
+GRADUAL_LT    = 3
+
+def defaultLowerTemp(cfg):
+    return GeometricLowerTemp(cfg, 0.84)
+
+def chooseLowerTemp(cfg, type, par):
+    # check type of par ....
+    if type == GEOMETRIC_LT:
+        return GeometricLowerTemp(cfg, par)
+    elif type == ARITHMETIC_LT:
+        return ArithmeticLowerTemp(cfg, par)
+    elif type  == GRADUAL_LT:
+        return GradualLowerTemp(cfg, par)
+
+    return defaultLowerTemp(cfg)
+
+MIN_TEMP_TT      = 1
+MAX_ITER_TT      = 2
+ACCEPT_FACTOR_TT = 3
+
+def defaultTerminalTest(cfg):
+    return MaxIterTerminalTest(cfg, 2000)
+
+def chooseTTest(cfg, type, par):
+    if type == MIN_TEMP_TT:
+        return MinTempTerminalTest(cfg, par)
+    elif type == MAX_ITER_TT:
+        return MaxIterTerminalTest(cfg, par)
+    elif type == ACCEPT_FACTOR_TT:
+        return AcceptFactorTerminalTest(cfg, par)
+
+    return defaultTerminalTest(cfg)
+
+CONSTANT_VAR_IT = 1
+LINEAR_VAR_IT   = 2
+
+def defaultVarNIter(cfg):
+    return ConstantNIterVar(cfg)
+
+def chooseVarNIter(cfg, type, par):
+    if type == CONSTANT_VAR_IT:
+        return ConstantNIterVar(cfg)
+    elif type == LINEAR_VAR_IT:
+        return LinearNIterVar(cfg, float(par))
+
+    return defaultVarNIter(cfg)
+
+def parse_cities(dm, clist : list[str] | str):
+    cities = []
+    for c in clist:
+        c = c.upper()
+        city = getCity(dm[0], c)
+        if city == None:
+            raise Exception('No city starts with ', c)
+        if city in cities:
+            raise Exception('City', city, 'already added')
+        
+        cities.append(city)
+    return cities
+
+def parse_file(file_name):
+    dm = readDistanceMatrix(FILE_NAME)
+    print('parsing:', file_name)
+    with open(file_name, 'r') as f:
+        info = loads(f.read())
+
+        # gets the cities
+        clist = info.get('cities')
+
+        cities = parse_cities(dm, clist) if clist else dm[0]
+
+        print('cities:', cities)
+        # get's the rest
+        problem = TravSalemanProblem(cities, dm) 
+        nIter = info.get('nIter', len(cities))
+        initTemp = info.get('initTemp', problem.calc_init_temp())
+
+        # chooses other parameters :)
+        config = Configs(nIter, initTemp)
+        aux = info.get('varTemp', {})
+        config = chooseLowerTemp(config, aux.get('type'), aux.get('parameter'))
+
+        aux = info.get('varNIter', {})
+        config = chooseVarNIter(config, aux.get('type'), aux.get('parameter'))
+
+        aux = info.get('terminalTest', {})
+        config = chooseTTest(config, aux.get('type'), aux.get('parameter'))
+
+    return problem, config 
 
 if __name__ == '__main__':
-    dm = readDistanceMatrix(FILE_NAME)
+
+    if len(argv) > 1:
+        file_name = argv[1]
+        try:
+            problem, config =  parse_file(file_name)
+        except Exception as e:
+            if type(e) == JSONDecodeError:
+                print('invalid json')
+            else:
+                print('erro parsing file:')
+
+            print(*e.args)
+    else:
+        print('getting user input :)')
+
+
+'''
+if __name__ == '__main__':
 
     # cities = dm[0]  # Todas as cidades
     cities = addCities(dm)
@@ -202,3 +312,4 @@ if __name__ == '__main__':
             print(f'Tentativa {i+1} | ', end="")
             print('cost:', problem.cost_func(sol), " : ", sol)
     print("Ended")
+'''

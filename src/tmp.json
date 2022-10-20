@@ -1,0 +1,18 @@
+{
+	"cities": ["a" , "b" , "c", "a"] ,
+	"nIter": 10 ,
+	"initTemp": 100,
+	"terminalTest": {
+		"type": 2,
+		"parameter": "1000"
+	} ,
+
+	"varTemp": {
+		"type": 2,
+		"parameter" : "0.84"
+	},
+
+	"varNIter": {
+		"type": 1
+	}
+}
