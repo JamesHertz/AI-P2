@@ -371,3 +371,10 @@ def searchSolution(problem: Problem, cfg: Configs):
             return best
 
     return best
+
+'''
+def printConfigs(cfg : Configs):
+    printLowerTemp(cfg)
+    printTerminalTest(cfg)
+    printVarNIter(cfg)
+'''
