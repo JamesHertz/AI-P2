@@ -191,14 +191,6 @@ if __name__ == '__main__':
     print("•Metodo decaimento temperatura: ", negrito, decaimentoChoice, normal)
     print("•Metodo de variacao do numero\n de iteracoes por temperatura: ", negrito, nIterVarChoice, normal)
     print()
-    cost = 99999
     
-    # think about this ....
-    for i in range(100):  # Vai repetindo ate chegar a melhor...
-        sol = searchSolution(problem, config)
-        newcost = problem.cost_func(sol)
-        if newcost < cost:
-            cost = newcost
-            print(f'Tentativa {i+1} | ', end="")
-            print('cost:', problem.cost_func(sol), " : ", sol)
-    print("Ended")
+    sol = searchSolution(problem, config)
+    print('cost:', problem.cost_func(sol), " : ", sol)
