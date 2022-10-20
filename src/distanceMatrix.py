@@ -242,7 +242,13 @@ class CompositeConfig:
 
 
 # lower_temp
-class ArithmeticLowerTemp(CompositeConfig):
+
+class LowerTemp(CompositeConfig):
+    def __init__(self, base_cfg):
+        super().__init__(base_cfg)
+
+
+class ArithmeticLowerTemp(LowerTemp):
 
     def __init__(self, base_cfg, n):
         super().__init__(base_cfg)
@@ -252,7 +258,7 @@ class ArithmeticLowerTemp(CompositeConfig):
         return temp - self.n
 
 
-class GradualLowerTemp(CompositeConfig):
+class GradualLowerTemp(LowerTemp):
 
     def __init__(self, base_cfg, beta):
         super().__init__(base_cfg)
@@ -262,7 +268,7 @@ class GradualLowerTemp(CompositeConfig):
         return temp / (1 + self.beta * temp)
 
 
-class GeometricLowerTemp(CompositeConfig):
+class GeometricLowerTemp(LowerTemp):
     def __init__(self, base_cfg, alpha):
         super().__init__(base_cfg)
         self.alpha = alpha
@@ -272,7 +278,12 @@ class GeometricLowerTemp(CompositeConfig):
 
 
 # var_n_iter
-class ConstantNIterVar(CompositeConfig):
+
+class NIterVar(CompositeConfig):
+    def __init__(self, base_cfg):
+        super().__init__(base_cfg)
+
+class ConstantNIterVar(NIterVar):
     def __init__(self, base_cfg):
         super().__init__(base_cfg)
 
@@ -280,7 +291,7 @@ class ConstantNIterVar(CompositeConfig):
         return super().get_n_iter()
 
 
-class LinearNIterVar(CompositeConfig):
+class LinearNIterVar(NIterVar):
     def __init__(self, base_cfg, factor):
         super().__init__(base_cfg)
         self.factor = factor
@@ -290,7 +301,11 @@ class LinearNIterVar(CompositeConfig):
 
 
 # terminal test
-class MaxIterTerminalTest(CompositeConfig):
+class TerminalTest(CompositeConfig):
+    def __init__(self, base_cfg):
+        super().__init__(base_cfg)
+
+class MaxIterTerminalTest(TerminalTest):
 
     def __init__(self, base_cfg, max_iter):
         super().__init__(base_cfg)
@@ -300,7 +315,7 @@ class MaxIterTerminalTest(CompositeConfig):
         return info[0] >= self.max_iter
 
 
-class MinTempTerminalTest(CompositeConfig):
+class MinTempTerminalTest(TerminalTest):
 
     def __init__(self, base_cfg, min_temp):
         super().__init__(base_cfg)
@@ -310,7 +325,7 @@ class MinTempTerminalTest(CompositeConfig):
         return info[3] <= self.min_temp
 
 
-class AcceptFactorTerminalTest(CompositeConfig):
+class AcceptFactorTerminalTest(TerminalTest):
 
     def __init__(self, base_cfg, accept_factor):
         super().__init__(base_cfg)
