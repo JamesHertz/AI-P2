@@ -226,8 +226,8 @@ def parse_cities(dm, clist : list[str] | str):
 
 def parse_file(file_name):
     dm = readDistanceMatrix(FILE_NAME)
-    print('parsing:', file_name)
     with open(file_name, 'r') as f:
+        print('parsing:', file_name)
         info = loads(f.read())
 
         # gets the cities
@@ -260,8 +260,10 @@ if __name__ == '__main__':
         file_name = argv[1]
         try:
             problem, config =  parse_file(file_name)
+        except FileNotFoundError:
+            print('File not found!')
         except Exception as e:
-            if type(e) == JSONDecodeError:
+            if isinstance(e, JSONDecodeError):
                 print('invalid json')
             else:
                 print('erro parsing file:')
@@ -269,7 +271,11 @@ if __name__ == '__main__':
             print(*e.args)
     else:
         print('getting user input :)')
-
+'''
+TODO:
+    - check if "parameter" is on the right type
+    - 
+'''
 
 '''
 if __name__ == '__main__':
